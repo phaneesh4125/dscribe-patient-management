@@ -29,7 +29,7 @@ A full-stack hospital patient admission management web application built for the
 ![Desktop Dashboard](./screenshots/desktop-dashboard.png)
 
 ### Register Patient Modal
-![Register Patient Modal](./screenshots/register-modal.jpg)
+![Register Patient Modal](./screenshots/register-modal.png)
 
 ### Mobile View
 ![Mobile View](./screenshots/mobile-view.png)
