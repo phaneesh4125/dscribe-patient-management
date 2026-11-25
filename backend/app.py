@@ -57,10 +57,14 @@ def add_patient():
     if error:
         return jsonify({"error": error}), 400
 
-    patient = Patient(**cleaned)
-    db.session.add(patient)
-    db.session.commit()
-    return jsonify(patient.to_dict()), 201
+    try:
+        patient = Patient(**cleaned)
+        db.session.add(patient)
+        db.session.commit()
+        return jsonify(patient.to_dict()), 201
+    except Exception as exc:
+        db.session.rollback()
+        return jsonify({"error": "Failed to save patient record.", "details": str(exc)}), 500
 
 
 @app.route("/api/patients/<int:patient_id>", methods=["PUT"])
@@ -73,11 +77,15 @@ def update_patient(patient_id):
     if error:
         return jsonify({"error": error}), 400
 
-    for key, value in cleaned.items():
-        setattr(patient, key, value)
+    try:
+        for key, value in cleaned.items():
+            setattr(patient, key, value)
 
-    db.session.commit()
-    return jsonify(patient.to_dict()), 200
+        db.session.commit()
+        return jsonify(patient.to_dict()), 200
+    except Exception as exc:
+        db.session.rollback()
+        return jsonify({"error": "Failed to update patient record.", "details": str(exc)}), 500
 
 
 @app.route("/api/patients/<int:patient_id>/discharge", methods=["PATCH"])
@@ -86,9 +94,13 @@ def discharge_patient(patient_id):
     if not patient:
         return jsonify({"error": "Patient not found."}), 404
 
-    patient.status = "Discharged"
-    db.session.commit()
-    return jsonify(patient.to_dict()), 200
+    try:
+        patient.status = "Discharged"
+        db.session.commit()
+        return jsonify(patient.to_dict()), 200
+    except Exception as exc:
+        db.session.rollback()
+        return jsonify({"error": "Failed to discharge patient.", "details": str(exc)}), 500
 
 
 @app.route("/api/patients/<int:patient_id>", methods=["DELETE"])
@@ -97,11 +109,15 @@ def delete_patient(patient_id):
     if not patient:
         return jsonify({"error": "Patient not found."}), 404
 
-    db.session.delete(patient)
-    db.session.commit()
-    return jsonify({"message": "Patient deleted successfully."}), 200
+    try:
+        db.session.delete(patient)
+        db.session.commit()
+        return jsonify({"message": "Patient deleted successfully."}), 200
+    except Exception as exc:
+        db.session.rollback()
+        return jsonify({"error": "Failed to delete patient.", "details": str(exc)}), 500
 
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=True)
+    app.run(host="0.0.0.0", port=port, debug=False)

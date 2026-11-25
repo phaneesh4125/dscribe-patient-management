@@ -37,9 +37,11 @@ def validate_patient_payload(data):
         return None, "Age is required."
     if isinstance(raw_age, bool):
         return None, "Age must be a valid whole number."
+    if isinstance(raw_age, float) and not raw_age.is_integer():
+        return None, "Age must be a valid whole number."
     try:
         age = int(raw_age)
-        if str(raw_age).strip() != str(age) and not isinstance(raw_age, int):
+        if not isinstance(raw_age, int) and str(raw_age).strip() != str(age):
             return None, "Age must be a valid whole number."
     except (ValueError, TypeError):
         return None, "Age must be a valid number."
